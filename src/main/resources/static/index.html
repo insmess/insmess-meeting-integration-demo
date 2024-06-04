@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <script src="js/vue.min.js"></script>
+    <script src="js/axios.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div v-if="!isLogin">
+      <h1>请先登录获取token</h1>
+      用户名：<input type="text" v-model="username"><br/>
+      密码：<input type="password" v-model="password"><br/>
+      <button @click="login">登录</button>
+      </div>
+      <div v-else>
+        会议id：<input type="text" v-model="meetingId">
+        密码：<input type="text" v-model="meetingPassword">
+        <button @click="joinMeeting">点击进入会议</button>
+      </div>
+    </div>
+</body>
+
+<script>
+    new Vue({
+      el: '#app',
+      data: {
+        isLogin: false,
+        username: '',
+        password: '',
+        meetingId: '',
+        meetingPassword: ''
+      },
+      methods: {
+        login() {
+          params = {
+              username: this.username,
+              password: this.password
+            };
+          axios.post('user/login', params).then(resp => {
+            console.log(resp.data)
+            if (resp.data.code == 200) {
+              sessionStorage.setItem('insmess-mt-demo-token', resp.data.data);
+              this.isLogin = true;
+            } else {
+              alert(resp.data.message)
+            }
+          });
+        },
+        joinMeeting() {
+          let token = sessionStorage.getItem('insmess-mt-demo-token');
+          let url = `http://localhost:9527/#/room/prepare-meeting?roomId=${this.meetingId}&token=${token}&password=${this.meetingPassword}`;
+          window.open(url, '_blank');
+        }
+      }
+    })
+</script>
+</html>
